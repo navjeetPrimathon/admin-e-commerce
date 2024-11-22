@@ -1,0 +1,23 @@
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { VersioningType } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+ 
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }));
+
+   // Enable versioning with a version prefix (e.g., /v1/ for version 1)
+  //  app.enableVersioning({
+  //   type: VersioningType.URI,
+  //   prefix: "v1"
+  // });
+ 
+  await app.listen(process.env.PORT ?? 3000);
+}
+bootstrap();
