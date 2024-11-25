@@ -10,7 +10,7 @@ import { IsEnum } from 'class-validator';
 
 import { UserRole, UserStatus } from '../constants/user.enum'
 
-@Entity()
+@Entity({ name: 'user'})
 export class User {
   @PrimaryGeneratedColumn()
   id: number;

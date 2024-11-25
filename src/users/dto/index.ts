@@ -1,4 +1,4 @@
-import { CreateUserDto } from "./ceate-users.dto";
+import { CreateUserDto } from "./create-users.dto";
 import { UpdateUserDto } from "./update-user.dto";
 import { UserResponseDto } from "./user-response.dto";
 import { DeleteUserDto } from "./delete-users.dto";

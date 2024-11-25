@@ -1,7 +1,7 @@
 import { IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateUserDto } from './ceate-users.dto';
-import { UpdateUserDto } from './update-user.dto';
+import { CreateUserDto } from './create-users.dto';
+import { UpdateUserPayloadDto } from './update-user-payload.dto';
 
 
 export class BulkCreateUsersDto {
@@ -14,8 +14,8 @@ export class BulkCreateUsersDto {
   export class BulkUpdateUsersDto {
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => UpdateUserDto)
-    updates: { identifier: string; data: UpdateUserDto }[];
+    @Type(() => UpdateUserPayloadDto)
+    updates: UpdateUserPayloadDto[];
   }
   
   export class BulkDeleteUsersDto {

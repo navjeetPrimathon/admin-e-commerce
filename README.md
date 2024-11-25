@@ -35,9 +35,17 @@ npm install
 Create a `.env` file in the root directory with the following variables:
 
 ```env
-DATABASE_URL=your_database_url
 PORT=3000
-NODE_ENV=development
+NODE_ENV=Development
+DB_HOST=your_database_url
+DB_PORT=your_database_port
+DB_USER=your_database_username
+DB_PASSWORD=your_database_password
+DB_NAME=your_database_name
+
+REDIS_PORT=your_redis_port
+REDIS_HOST=your_redis_host
+REDIS_PASSWORD=your_redis_password
 ```
 
 ### 4. Start the Server

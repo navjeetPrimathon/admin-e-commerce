@@ -40,9 +40,8 @@ export class UsersService {
 
       // Clear any filtered results
       const filterKeys = await this.cacheManager.store.keys(CACHE_KEYS.USERS_FILTERED('*'));
-      console.log(filterKeys,"filtered keys to delete")
       cachesToClear.push(...filterKeys);
-      console.log(cachesToClear,"cache to clear from redis")
+
       await Promise.all(cachesToClear.map(key => this.cacheManager.del(key)));
       this.logger.debug(`Cleared caches: ${cachesToClear.join(', ')}`);
     } catch (error) {
@@ -100,6 +99,55 @@ export class UsersService {
         throw error;
       }
       throw new InternalServerErrorException('Error creating user');
+    }
+  }
+
+
+  async findById(id: number): Promise<UserResponseDto> {
+    try {
+      // Try to get from cache first
+      const cacheKey = CACHE_KEYS.USER_DETAIL(id.toString());
+      const cachedUser = await this.cacheManager.get<User>(cacheKey);
+
+      if (cachedUser) {
+        this.logger.debug('Returning user from cache');
+        return this.mapUserToDto(cachedUser);
+      }
+
+      const user = await this.userRepository
+        .createQueryBuilder('user')
+        .select([
+          'user.id',
+          'user.email',
+          'user.name',
+          'user.status',
+          'user.role',
+          'user.createdAt',
+          'user.updatedAt'
+        ])
+        .where('user.id = :id', { id })
+        .cache(true) // Performance Optimization 2: Enable TypeORM query caching
+        .getOne();
+
+      if (!user) {
+        this.logger.debug(`Cache miss & DB miss: User ${id} not found`);
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+
+      // Cache the user
+      const cachePromise = this.cacheManager.set(cacheKey, user, this.CACHE_TTL);
+
+      const userDto = this.mapUserToDto(user);
+
+      await cachePromise;
+      this.logger.debug(`Cache miss & DB hit: Cached user ${id}`);
+
+      return userDto;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error fetching user');
     }
   }
 
@@ -197,7 +245,6 @@ export class UsersService {
       const cacheKey = CACHE_KEYS.USER_DETAIL(identifier);
       user = await this.cacheManager.get<User>(cacheKey);
 
-      console.log(user, "userssssssssssssssssssssssssssssssssssssssssssssss")
       // If user is not found, throw an exception
       if (!user) {
         user = await this.findUserByIdentifier(identifier);
@@ -209,6 +256,8 @@ export class UsersService {
         // Cache the found user
         await this.cacheManager.set(cacheKey, user, this.CACHE_TTL);
       }
+
+      console.log(user, "user")
       // If email is being updated, check for uniqueness
       if (updateUserDto.email && updateUserDto.email !== user.email) {
         const existingUser = await this.userRepository.findOne({
@@ -219,7 +268,7 @@ export class UsersService {
           throw new ConflictException('Email already exists');
         }
       }
-      console.log(updateUserDto, "update user dto 1122")
+      
       // If password is being updated, hash it
       if (updateUserDto.password) {
         const salt = await bcrypt.genSalt();
@@ -227,16 +276,12 @@ export class UsersService {
         updateUserDto.password = hashedPassword;
       }
 
-      console.log(updateUserDto, "33444 update user dto")
-
       // Merge the update DTO with existing user
       const updatedUser = this.userRepository.merge(user, updateUserDto);
-      console.log(updateUserDto, "44444444")
-
+      console.log(updatedUser, "updated user")
       // Save the updated user
       const savedUser = await this.userRepository.save(updatedUser);
       console.log(savedUser, "saved user")
-
       // Clear all related caches
       await this.clearUserRelatedCaches(
         identifier,
@@ -299,13 +344,13 @@ export class UsersService {
     const userBatches = this.chunk(bulkCreateUsersDto.users, BATCH_SIZE);
 
     // Pre-generate password hashes concurrently
-    const hashPromises = bulkCreateUsersDto.users.map(user => 
+    const hashPromises = bulkCreateUsersDto.users.map(user =>
       bcrypt.hash(user.password, 10)
     );
     const hashedPasswords = await Promise.all(hashPromises);
     const passwordMap = new Map(
       bulkCreateUsersDto.users.map((user, index) => [
-        user.email, 
+        user.email,
         hashedPasswords[index]
       ])
     );
@@ -327,12 +372,12 @@ export class UsersService {
   }
 
   private async processBatch(
-    batch: CreateUserDto[], 
-    passwordMap: Map<string, string>, 
+    batch: CreateUserDto[],
+    passwordMap: Map<string, string>,
     results: BulkOperationResponseDto
   ): Promise<void> {
     const batchEmails = batch.map(user => user.email.toLowerCase());
-    
+
     // Check existing users in single query
     const existingUsers = await this.userRepository.find({
       where: { email: In(batchEmails) },
@@ -429,7 +474,7 @@ export class UsersService {
           const user = await this.findUserByIdentifier(identifier);
           if (user) {
             await transactionalEntityManager.remove(user);
-            await this.clearUserRelatedCaches(user.id.toString(), user.email);
+            await this.clearUserRelatedCaches(String(user.id), user.email);
           }
         }
       });
@@ -437,12 +482,16 @@ export class UsersService {
   }
 
   private async findUserByIdentifier(identifier: string): Promise<User | null> {
-    return await this.userRepository.findOne({
-      where: [
-        { id: Number(identifier) },
-        { email: identifier },
-      ],
-    });
+    const queryBuilder = this.userRepository.createQueryBuilder('user');
+
+    const isNumeric = !isNaN(Number(identifier)); // Check if identifier is numeric
+    if (isNumeric) {
+      queryBuilder.where('user.id = :id', { id: Number(identifier) });
+    } else {
+      queryBuilder.where('user.email = :email', { email: identifier });
+    }
+  
+    return await queryBuilder.getOne();
   }
 
   // Helper function for chunking arrays

@@ -13,7 +13,7 @@ import { Global, Module } from '@nestjs/common';
             host: process.env.REDIS_HOST || 'localhost',
             port: Number(process.env.REDIS_PORT) || 6379,
           },
-          password: process.env.REDIS_PASSWORD
+          // password: process.env.REDIS_PASSWORD
         })) as any,
         
         ttl: 300 * 1000, // 5 minutes default TTL

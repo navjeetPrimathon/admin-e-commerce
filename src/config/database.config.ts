@@ -11,10 +11,15 @@ export const databaseConfig = registerAs('database', (): TypeOrmModuleOptions =>
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   autoLoadEntities: true,
+  // schema: 'auth',
   entities: [User],
   synchronize: process.env.NODE_ENV !== 'production',
   logging: process.env.NODE_ENV === 'development' ? ["query", "error", "schema"] : ["error"],
   ssl: process.env.NODE_ENV === 'production',
+  extra: {
+    max: 30,
+    statement_timeout: 10000 // timeout queries after 10s
+  }
 }));
 
 // For TypeORM CLI migrations (typeorm-cli.config.ts)

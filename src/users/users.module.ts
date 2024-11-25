@@ -4,13 +4,14 @@ import { UsersController } from './users.controller';
 import { User } from './entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedisCacheModule } from '../config/redis.config';
+import { BulkUsersController } from './bulk-users.controllers';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]), // Make sure UserRepository is available
+    TypeOrmModule.forFeature([User]),
     RedisCacheModule
   ],
   providers: [UsersService],
-  controllers: [UsersController]
+  controllers: [UsersController, BulkUsersController]
 })
 export class UsersModule {}

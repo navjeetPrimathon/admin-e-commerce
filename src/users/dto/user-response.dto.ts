@@ -21,8 +21,8 @@ export class UserResponseDto {
   role: UserRole;
 
   @Expose()
-  created_at: Date;
+  createdAt: Date;
 
   @Expose()
-  updated_at: Date;
+  updatedAt: Date;
 }
