@@ -7,8 +7,9 @@ import {
   Index,
 } from 'typeorm';
 import { IsEnum } from 'class-validator';
+import { Role } from 'src/constants/role.enum';
+import { Status } from 'src/constants/status.enum';
 
-import { UserRole, UserStatus } from '../constants/user.enum'
 
 @Entity({ name: 'user'})
 export class User {
@@ -28,13 +29,13 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: 'customer', type: 'enum', enum: UserRole })
-  @IsEnum(UserRole)
-  role: UserRole;
+  @Column({ default: 'customer', type: 'enum', enum: Role })
+  @IsEnum(Role)
+  role: Role;
 
-  @Column({ default: 'active', type: 'enum', enum: UserStatus })
-  @IsEnum(UserStatus)
-  status: UserStatus;
+  @Column({ default: 'active', type: 'enum', enum: Status })
+  @IsEnum(Status)
+  status: Status;
 
   @Column({ nullable: true })
   avatar: string; // Profile picture URL

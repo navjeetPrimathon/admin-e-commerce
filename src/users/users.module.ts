@@ -12,6 +12,7 @@ import { BulkUsersController } from './bulk-users.controllers';
     RedisCacheModule
   ],
   providers: [UsersService],
-  controllers: [UsersController, BulkUsersController]
+  controllers: [UsersController, BulkUsersController],
+  exports: [UsersService]
 })
 export class UsersModule {}

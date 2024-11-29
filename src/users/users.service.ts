@@ -6,7 +6,7 @@ import { BulkCreateUsersDto, BulkDeleteUsersDto, BulkOperationResponseDto, BulkU
 import { plainToClass } from 'class-transformer';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
-import { CACHE_KEYS } from './constants/cache-key.constant';
+import { CACHE_KEYS } from '../constants/cache-key.constants';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -481,15 +481,16 @@ export class UsersService {
     }
   }
 
-  private async findUserByIdentifier(identifier: string): Promise<User | null> {
+  public async findUserByIdentifier(identifier: string): Promise<User | null> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
-
     const isNumeric = !isNaN(Number(identifier)); // Check if identifier is numeric
     if (isNumeric) {
       queryBuilder.where('user.id = :id', { id: Number(identifier) });
     } else {
+      console.log("yessss")
       queryBuilder.where('user.email = :email', { email: identifier });
     }
+    // console.log(queryBuilder)
   
     return await queryBuilder.getOne();
   }

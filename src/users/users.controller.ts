@@ -1,10 +1,15 @@
-import { Controller, Get, Query, UseInterceptors, ValidationPipe, SerializeOptions, Body, Post, HttpCode, HttpStatus, Put, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Query, UseInterceptors, ValidationPipe, SerializeOptions, Body, Post, HttpCode, HttpStatus, Put, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { TransformInterceptor } from '../interceptors/transform.interceptor';
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { CreateUserDto, GetUsersFilterDto, PaginatedUsersResponseDto, UpdateUserDto, UserResponseDto } from './dto';
+import { AuthenticationGuard } from 'src/guards/authentication.guards';
+import { RolesGuard } from 'src/guards/roles.guards';
+import { Roles } from 'src/decorators/role.decorator';
+import { Role } from 'src/constants/role.enum';
 
 @Controller({ path: 'users' })
+@UseGuards(AuthenticationGuard, RolesGuard)
 @SerializeOptions({
   // strategy: 'excludeAll'
 })
@@ -14,6 +19,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   // Route to fetch list of users 
+  @Roles(Role.ADMIN)
   @Get()
   @HttpCode(HttpStatus.OK)
   async getUsers(
@@ -43,6 +49,7 @@ export class UsersController {
     return user;
   }
 
+  @Roles(Role.ADMIN)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async getUserById(

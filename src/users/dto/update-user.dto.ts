@@ -1,6 +1,7 @@
 import { IsOptional, IsString, IsEnum, Min, IsEmail, IsDecimal, IsBoolean, IsDate } from 'class-validator';
-import { UserRole, UserStatus } from '../constants/user.enum';
 import { Transform } from 'class-transformer';
+import { Role } from 'src/constants/role.enum';
+import { Status } from 'src/constants/status.enum';
 
 export class UpdateUserDto {
     @IsString()
@@ -18,13 +19,13 @@ export class UpdateUserDto {
     @IsOptional()
     password?: string;
   
-    @IsEnum(UserRole)
+    @IsEnum(Role)
     @IsOptional()
-    role?: UserRole;
+    role?: Role;
   
-    @IsEnum(UserStatus)
+    @IsEnum(Status)
     @IsOptional()
-    status?: UserStatus;
+    status?: Status;
   
     @IsString()
     @IsOptional()

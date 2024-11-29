@@ -1,6 +1,7 @@
 import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { UserRole, UserStatus } from '../constants/user.enum';
+import { Role } from 'src/constants/role.enum';
+import { Status } from 'src/constants/status.enum';
 
 export class GetUsersFilterDto {
     @IsOptional()
@@ -20,12 +21,12 @@ export class GetUsersFilterDto {
     phone?: string;
   
     @IsOptional()
-    @IsEnum(UserStatus)
-    status?: UserStatus;
+    @IsEnum(Status)
+    status?: Status;
   
     @IsOptional()
-    @IsEnum(UserRole)
-    role?: UserRole;
+    @IsEnum(Role)
+    role?: Role;
   
     @IsOptional()
     @Transform(({ value }) => parseInt(value))

@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
-import { UserRole, UserStatus } from '../constants/user.enum';
+import { Status } from 'src/constants/status.enum';
+import { Role } from 'src/constants/role.enum';
 
 export class UserResponseDto {
   @Expose()
@@ -15,10 +16,10 @@ export class UserResponseDto {
   phone: string;
 
   @Expose()
-  status: UserStatus;
+  status: Status;
 
   @Expose()
-  role: UserRole;
+  role: Role;
 
   @Expose()
   createdAt: Date;
